@@ -5,10 +5,10 @@ import './globals.css';
 const inter = Inter({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
-  title: 'Retrospectiva Medcof 2024',
+  title: 'Retrospectiva Medcof 2025',
   description: 'Veja sua jornada de estudos em medicina durante o ano',
   openGraph: {
-    title: 'Retrospectiva Medcof 2024',
+    title: 'Retrospectiva Medcof 2025',
     description: 'Veja sua jornada de estudos em medicina durante o ano',
     type: 'website',
   },

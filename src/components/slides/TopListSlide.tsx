@@ -16,14 +16,6 @@ interface TopListSlideProps {
   gradient?: string;
 }
 
-const rankColors = [
-  'from-yellow-400 to-amber-500', // 1st
-  'from-gray-300 to-gray-400', // 2nd
-  'from-orange-400 to-orange-600', // 3rd
-  'from-cyan-400 to-cyan-500', // 4th
-  'from-purple-400 to-purple-500', // 5th
-];
-
 const rankEmojis = ['🥇', '🥈', '🥉', '4️⃣', '5️⃣'];
 
 export default function TopListSlide({
@@ -34,20 +26,20 @@ export default function TopListSlide({
 }: TopListSlideProps) {
   return (
     <div
-      className={`slide-container bg-gradient-to-br ${gradient} flex flex-col items-center justify-center p-8`}
+      className={`slide-container bg-gradient-to-br ${gradient} flex flex-col items-center justify-center p-4 sm:p-8 pt-10 sm:pt-12`}
     >
       {/* Animated particles */}
-      <div className="absolute inset-0 overflow-hidden">
-        {[...Array(20)].map((_, i) => (
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        {[...Array(12)].map((_, i) => (
           <motion.div
             key={i}
             className="absolute w-1 h-1 bg-white/30 rounded-full"
             initial={{
-              x: Math.random() * 400,
-              y: Math.random() * 800,
+              x: Math.random() * 300,
+              y: Math.random() * 600,
             }}
             animate={{
-              y: [null, -100],
+              y: [null, -80],
               opacity: [0, 1, 0],
             }}
             transition={{
@@ -63,42 +55,42 @@ export default function TopListSlide({
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6 }}
-        className="relative z-10 w-full max-w-md"
+        className="relative z-10 w-full max-w-sm"
       >
-        <div className="text-center mb-8">
+        <div className="text-center mb-4 sm:mb-6">
           <h2
-            className="text-3xl md:text-4xl font-black text-white mb-2"
+            className="text-2xl sm:text-3xl font-black text-white mb-1 sm:mb-2"
             style={{ fontFamily: 'Clash Display, sans-serif' }}
           >
             {title}
           </h2>
-          {subtitle && <p className="text-white/60 text-sm">{subtitle}</p>}
+          {subtitle && <p className="text-white/60 text-xs sm:text-sm">{subtitle}</p>}
         </div>
 
-        <div className="space-y-3">
+        <div className="space-y-2 sm:space-y-3">
           {items.slice(0, 5).map((item, index) => (
             <motion.div
               key={item.title}
-              initial={{ opacity: 0, x: -50, scale: 0.8 }}
+              initial={{ opacity: 0, x: -30, scale: 0.9 }}
               animate={{ opacity: 1, x: 0, scale: 1 }}
               transition={{
-                delay: 0.3 + index * 0.12,
-                duration: 0.5,
+                delay: 0.2 + index * 0.1,
+                duration: 0.4,
                 type: 'spring',
                 stiffness: 100,
               }}
               className={`
-                relative overflow-hidden rounded-xl p-4
+                relative overflow-hidden rounded-lg sm:rounded-xl p-3 sm:p-4
                 ${index === 0 ? 'bg-gradient-to-r from-yellow-500/30 to-amber-500/30 border-2 border-yellow-400/50' : 'bg-white/10 border border-white/20'}
               `}
             >
-              <div className="flex items-center gap-4">
+              <div className="flex items-center gap-2 sm:gap-3">
                 <motion.div
                   initial={{ rotate: -180, scale: 0 }}
                   animate={{ rotate: 0, scale: 1 }}
-                  transition={{ delay: 0.5 + index * 0.12, type: 'spring' }}
+                  transition={{ delay: 0.3 + index * 0.1, type: 'spring' }}
                   className={`
-                    w-12 h-12 rounded-full flex items-center justify-center text-2xl
+                    w-9 h-9 sm:w-11 sm:h-11 rounded-full flex items-center justify-center text-lg sm:text-xl flex-shrink-0
                     ${index === 0 ? 'bg-gradient-to-br from-yellow-400 to-amber-500' : 'bg-white/20'}
                   `}
                 >
@@ -107,16 +99,16 @@ export default function TopListSlide({
 
                 <div className="flex-1 min-w-0">
                   <h3
-                    className={`font-bold truncate ${index === 0 ? 'text-xl text-yellow-100' : 'text-lg text-white'}`}
+                    className={`font-bold truncate ${index === 0 ? 'text-base sm:text-lg text-yellow-100' : 'text-sm sm:text-base text-white'}`}
                   >
                     {item.title}
                   </h3>
-                  <p className="text-white/60 text-sm">{item.value}</p>
+                  <p className="text-white/60 text-xs sm:text-sm truncate">{item.value}</p>
                 </div>
 
                 <div
                   className={`
-                    text-2xl font-black
+                    text-lg sm:text-xl font-black flex-shrink-0
                     ${index === 0 ? 'text-yellow-400' : 'text-white/40'}
                   `}
                 >
@@ -146,12 +138,11 @@ export default function TopListSlide({
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
-        transition={{ delay: 1.2, duration: 0.5 }}
-        className="absolute bottom-8 left-1/2 -translate-x-1/2"
+        transition={{ delay: 1, duration: 0.5 }}
+        className="absolute bottom-4 sm:bottom-8 left-1/2 -translate-x-1/2"
       >
-        <p className="text-white/40 text-sm font-medium tracking-wider">MEDCOF</p>
+        <p className="text-white/40 text-xs sm:text-sm font-medium tracking-wider">MEDCOF</p>
       </motion.div>
     </div>
   );
 }
-

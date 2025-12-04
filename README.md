@@ -1,17 +1,18 @@
-# 🎓 Retrospectiva Medcof 2024
+# 🎓 Retrospectiva Medcof 2025
 
-Uma retrospectiva estilo "Spotify Wrapped" para estudantes de medicina, com conexão ao MongoDB para estatísticas reais e exportação para Instagram Stories.
+Uma retrospectiva estilo "Spotify Wrapped" para estudantes de medicina, com integração à API do QBank e exportação para Instagram Stories.
 
 ![Preview](https://img.shields.io/badge/Next.js-16-black?style=for-the-badge&logo=next.js)
-![Preview](https://img.shields.io/badge/MongoDB-Ready-green?style=for-the-badge&logo=mongodb)
+![Preview](https://img.shields.io/badge/API-QBank-green?style=for-the-badge)
 ![Preview](https://img.shields.io/badge/Instagram-Stories-E4405F?style=for-the-badge&logo=instagram)
 
 ## ✨ Funcionalidades
 
-- 📊 **Estatísticas completas** - Questões, flashcards, vídeos, tempo de estudo
-- 🎯 **Top 5 especialidades** - Baseado no tempo de estudo
-- 🦉 **Personalidade de estudo** - Determinada pelos hábitos do aluno
-- 💡 **Fun Facts** - Dados curiosos sobre o comportamento de estudo
+- 📊 **Estatísticas de questões** - Total resolvido, acertos, erros, taxa de acerto
+- 🔥 **Métricas de dedicação** - Dias de estudo, maior sequência, média diária
+- 🏆 **Top 5 especialidades** - Áreas onde você mais praticou
+- 🧠 **Personalidade de estudo** - Determinada pelos seus hábitos
+- 💡 **Fun Facts** - Dados curiosos sobre seu desempenho
 - 📱 **Export para Instagram** - Imagens otimizadas para Stories (1080x1920)
 - 🎨 **Design moderno** - Animações fluidas com Framer Motion
 
@@ -23,21 +24,7 @@ Uma retrospectiva estilo "Spotify Wrapped" para estudantes de medicina, com cone
 npm install
 ```
 
-### 2. Configurar variáveis de ambiente
-
-Crie um arquivo `.env.local` na raiz do projeto:
-
-```env
-MONGODB_URI=mongodb://localhost:27017/medcof
-```
-
-Ou conecte ao seu MongoDB Atlas:
-
-```env
-MONGODB_URI=mongodb+srv://<user>:<password>@cluster.mongodb.net/medcof
-```
-
-### 3. Rodar o projeto
+### 2. Rodar o projeto
 
 ```bash
 npm run dev
@@ -45,97 +32,45 @@ npm run dev
 
 Acesse [http://localhost:3000](http://localhost:3000)
 
-### 4. Testar com dados demo
+### 3. Usar a aplicação
 
-Acesse [http://localhost:3000?demo=true](http://localhost:3000?demo=true) para ver uma demonstração com dados fictícios.
+1. Faça login no QBank
+2. Obtenha seu token JWT (ver instruções abaixo)
+3. Cole o token no campo e clique em "Ver Retrospectiva"
 
-## 📦 Collections MongoDB Necessárias
+Ou acesse [http://localhost:3000?demo=true](http://localhost:3000?demo=true) para ver uma demonstração.
 
-O projeto se conecta às seguintes collections do MongoDB:
+## 🔑 Como obter seu token JWT
 
-### `qbank_test_interactions`
+1. Faça login no [QBank](https://qbank.medcof.com.br)
+2. Abra as ferramentas de desenvolvedor (F12)
+3. Vá na aba **Network** (Rede)
+4. Faça qualquer requisição (ex: clique em algum menu)
+5. Encontre uma requisição para a API
+6. Nos headers da requisição, copie o valor de **Authorization**
+7. Cole na aplicação (sem o "Bearer ")
 
-Interações do aluno com questões do QBank.
+## 📡 APIs Utilizadas
 
-```javascript
-{
-  userId: Number,           // ID do usuário
-  questionId: ObjectId,     // ID da questão
-  answerId: ObjectId,       // ID da resposta
-  wasRight: Boolean,        // Se acertou
-  wasNulledQuestion: Boolean,
-  testMode: "study" | "test" | "ranked",
-  isRankedTest: Boolean,
-  deleted: { isDeleted: Boolean, deletedAt: Date },
-  createdAt: Date,
-  updatedAt: Date
-}
-```
+A aplicação consome os seguintes endpoints da API do QBank:
 
-### `userflashcardinteractions`
+| Endpoint | Descrição |
+|----------|-----------|
+| `GET /v3/reports/questions/answered/daily` | Questões respondidas por dia |
+| `GET /v3/reports/questions/answered` | Resumo total de questões |
+| `GET /v3/reports/questions/ever-answered-wrong` | Questões que mais errou |
+| `GET /v3/reports/graph/right-answers-evolution` | Evolução da taxa de acerto |
 
-Interações do aluno com flashcards.
-
-```javascript
-{
-  userId: Number | ObjectId,
-  flashCardId: ObjectId,
-  flashCardStackId: ObjectId,
-  score: Number,            // 0-3 (não lembrei, difícil, bom, fácil)
-  timeInSeconds: Number,
-  ease: Number,
-  repetition: Number,
-  intervalInMinutes: Number,
-  intervalDate: Date,
-  deleted: { isDeleted: Boolean, deletedAt: Date },
-  createdAt: Date,
-  updatedAt: Date
-}
-```
-
-### `video_daily_tracker`
-
-Tracking diário de vídeos assistidos.
-
-```javascript
-{
-  userId: Number,
-  date: Date,
-  trackers: [{
-    videoId: ObjectId,
-    aqfmId: Number,
-    productId: Number,
-    blockNumber: Number,
-    progress: [[Number, Number]],  // [segundoInicio, segundoFim]
-    totalSecondsWatched: Number,
-    videoTotalSeconds: Number,
-    wasFinished: Boolean,
-    pings: Number,
-    lastSeenAt: Date,
-    ips: [String],
-    tags: [{
-      tagId: ObjectId,
-      tagName: String,
-      rootParentTagId: ObjectId,
-      rootParentTagName: String
-    }]
-  }],
-  dailyTotalSecondsWatched: Number,
-  videosWatched: Number,
-  videosFinished: Number,
-  createdAt: Date,
-  updatedAt: Date
-}
-```
+Todas as requisições usam o período de **1 de janeiro a 31 de dezembro de 2025**.
 
 ## 🎨 Slides da Retrospectiva
 
 | Slide | Descrição |
 |-------|-----------|
-| 1. Intro | Apresentação personalizada com o ano |
-| 2. Estatísticas | Horas de estudo, questões, taxa de acerto |
-| 3. Mais conquistas | Flashcards e vídeos assistidos |
-| 4. Top 5 | Especialidades mais estudadas |
+| 1. Intro | Apresentação personalizada "SEU 2025 em Medicina" |
+| 2. Questões | Total resolvido, acertos, taxa de acerto |
+| 3. Dedicação | Dias de estudo, sequência, média diária |
+| 4. Top 5 | Especialidades mais praticadas |
 | 5. Personalidade | Tipo de estudante + fun fact |
 | 6. Resumo | Resumo final com métricas-chave |
 
@@ -143,11 +78,11 @@ Tracking diário de vídeos assistidos.
 
 - **O Estrategista** - Alta consistência e taxa de acerto
 - **O Maratonista** - Alto volume de questões
-- **A Coruja Noturna** - Estuda depois das 22h
-- **O Madrugador** - Estuda entre 5h e 8h
-- **O Memorizador** - Foco em flashcards
-- **O Visual** - Foco em vídeos
-- **O Equilibrado** - Usa todas as ferramentas
+- **O Consistente** - Estuda todos os dias
+- **O Intenso** - Sessões de estudo intensas
+- **O Preciso** - Alta taxa de acerto
+- **O Dedicado** - Presente na maioria dos dias
+- **O Equilibrado** - Ritmo saudável de estudos
 
 ## 📱 Exportação para Instagram
 
@@ -160,32 +95,6 @@ As imagens são geradas no formato ideal para Instagram Stories:
 - **Baixar Slide**: Exporta apenas o slide atual
 - **Baixar Tudo**: Exporta todos os 6 slides em sequência
 
-## 🔧 API Routes
-
-### GET `/api/retrospective`
-
-Busca estatísticas de um usuário.
-
-**Query params:**
-- `userId` (required) - ID numérico do usuário
-- `year` (optional) - Ano da retrospectiva (default: ano atual)
-- `demo` (optional) - Se `true`, retorna dados de demonstração
-
-**Exemplo:**
-```bash
-curl "http://localhost:3000/api/retrospective?userId=12345&year=2024"
-```
-
-## 🛠️ Tecnologias
-
-- **Next.js 16** - Framework React com App Router
-- **TypeScript** - Tipagem estática
-- **MongoDB + Mongoose** - Banco de dados
-- **Tailwind CSS** - Estilização
-- **Framer Motion** - Animações
-- **html-to-image** - Exportação de imagens
-- **Lucide React** - Ícones
-
 ## 📂 Estrutura do Projeto
 
 ```
@@ -193,10 +102,10 @@ src/
 ├── app/
 │   ├── api/
 │   │   └── retrospective/
-│   │       └── route.ts       # API de estatísticas
+│   │       └── route.ts       # API proxy para QBank
 │   ├── globals.css            # Estilos globais
 │   ├── layout.tsx             # Layout principal
-│   └── page.tsx               # Página principal
+│   └── page.tsx               # Página principal com form JWT
 ├── components/
 │   ├── Carousel.tsx           # Carrossel principal
 │   └── slides/
@@ -206,13 +115,25 @@ src/
 │       ├── PersonalitySlide.tsx # Slide de personalidade
 │       └── SummarySlide.tsx   # Slide de resumo
 ├── lib/
-│   ├── mongodb.ts             # Conexão MongoDB
-│   └── statistics.ts          # Funções de agregação
-└── models/
-    ├── QBankTestInteraction.ts
-    ├── UserFlashCardInteraction.ts
-    └── VideoDailyTracker.ts
+│   └── api-client.ts          # Cliente para API QBank
+└── types/
+    └── api.ts                 # Tipos TypeScript
 ```
+
+## 🛠️ Tecnologias
+
+- **Next.js 16** - Framework React com App Router
+- **TypeScript** - Tipagem estática
+- **Tailwind CSS** - Estilização
+- **Framer Motion** - Animações
+- **html-to-image** - Exportação de imagens
+- **Lucide React** - Ícones
+
+## 🔒 Segurança
+
+- O token JWT é enviado apenas para a API do QBank
+- Nenhum dado é armazenado no servidor
+- O token fica apenas no navegador do usuário
 
 ## 📄 Licença
 

@@ -24,20 +24,20 @@ export default function PersonalitySlide({ personality, funFact }: PersonalitySl
   const emoji = personalityEmojis[personality.type] || '✨';
 
   return (
-    <div className="slide-container bg-gradient-to-br from-pink-900 via-rose-900 to-red-900 flex flex-col items-center justify-center p-8">
+    <div className="slide-container bg-gradient-to-br from-pink-900 via-rose-900 to-red-900 flex flex-col items-center justify-center p-4 sm:p-8 pt-10 sm:pt-12">
       {/* Animated hearts/stars background */}
-      <div className="absolute inset-0 overflow-hidden">
-        {[...Array(15)].map((_, i) => (
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        {[...Array(10)].map((_, i) => (
           <motion.div
             key={i}
-            className="absolute text-2xl"
+            className="absolute text-lg sm:text-2xl"
             initial={{
-              x: Math.random() * 400,
-              y: Math.random() * 800,
+              x: Math.random() * 300,
+              y: Math.random() * 500,
               opacity: 0,
             }}
             animate={{
-              y: [null, -100],
+              y: [null, -80],
               opacity: [0, 0.3, 0],
               rotate: [0, 360],
             }}
@@ -56,13 +56,13 @@ export default function PersonalitySlide({ personality, funFact }: PersonalitySl
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 0.8 }}
-        className="relative z-10 w-full max-w-md text-center"
+        className="relative z-10 w-full max-w-sm text-center"
       >
         <motion.p
           initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.2 }}
-          className="text-white/60 text-lg mb-4 uppercase tracking-wider"
+          className="text-white/60 text-sm sm:text-base mb-2 sm:mb-4 uppercase tracking-wider"
         >
           Sua personalidade de estudo
         </motion.p>
@@ -71,7 +71,7 @@ export default function PersonalitySlide({ personality, funFact }: PersonalitySl
           initial={{ scale: 0 }}
           animate={{ scale: 1 }}
           transition={{ delay: 0.4, type: 'spring', stiffness: 200 }}
-          className="text-8xl mb-6"
+          className="text-5xl sm:text-7xl mb-3 sm:mb-5"
         >
           {emoji}
         </motion.div>
@@ -80,7 +80,7 @@ export default function PersonalitySlide({ personality, funFact }: PersonalitySl
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.6 }}
-          className="text-4xl md:text-5xl font-black text-white mb-6"
+          className="text-2xl sm:text-4xl font-black text-white mb-3 sm:mb-5"
           style={{ fontFamily: 'Clash Display, sans-serif' }}
         >
           {personality.type}
@@ -90,9 +90,9 @@ export default function PersonalitySlide({ personality, funFact }: PersonalitySl
           initial={{ opacity: 0, scale: 0.9 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ delay: 0.8 }}
-          className="bg-white/10 backdrop-blur-sm rounded-2xl p-6 border border-white/20"
+          className="bg-white/10 backdrop-blur-sm rounded-xl sm:rounded-2xl p-4 sm:p-5 border border-white/20"
         >
-          <p className="text-white/90 text-lg leading-relaxed">
+          <p className="text-white/90 text-sm sm:text-base leading-relaxed">
             {personality.description}
           </p>
         </motion.div>
@@ -102,10 +102,10 @@ export default function PersonalitySlide({ personality, funFact }: PersonalitySl
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 1 }}
-            className="mt-6 bg-gradient-to-r from-yellow-500/20 to-orange-500/20 rounded-2xl p-5 border border-yellow-400/30"
+            className="mt-3 sm:mt-5 bg-gradient-to-r from-yellow-500/20 to-orange-500/20 rounded-xl sm:rounded-2xl p-3 sm:p-4 border border-yellow-400/30"
           >
-            <p className="text-yellow-100 text-base">
-              <span className="text-xl mr-2">💡</span>
+            <p className="text-yellow-100 text-xs sm:text-sm">
+              <span className="text-base sm:text-xl mr-1 sm:mr-2">💡</span>
               {funFact}
             </p>
           </motion.div>
@@ -117,11 +117,10 @@ export default function PersonalitySlide({ personality, funFact }: PersonalitySl
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ delay: 1.2, duration: 0.5 }}
-        className="absolute bottom-8 left-1/2 -translate-x-1/2"
+        className="absolute bottom-4 sm:bottom-8 left-1/2 -translate-x-1/2"
       >
-        <p className="text-white/40 text-sm font-medium tracking-wider">MEDCOF</p>
+        <p className="text-white/40 text-xs sm:text-sm font-medium tracking-wider">MEDCOF</p>
       </motion.div>
     </div>
   );
 }
-

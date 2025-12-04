@@ -2,7 +2,7 @@
 
 import { useState, useRef, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ChevronLeft, ChevronRight, Download, Share2 } from 'lucide-react';
+import { Download, Share2 } from 'lucide-react';
 import { toPng } from 'html-to-image';
 
 import IntroSlide from './slides/IntroSlide';
@@ -60,27 +60,30 @@ export default function Carousel({ data }: CarouselProps) {
   const [isExporting, setIsExporting] = useState(false);
   const slideRefs = useRef<(HTMLDivElement | null)[]>([]);
 
+  // Calcula questões erradas
+  const questionsWrong = data.questions.total - data.questions.correct;
+
   const slides = [
     // Slide 1: Intro
     <IntroSlide key="intro" year={data.year} userName={data.userName} />,
 
-    // Slide 2: Study Stats
+    // Slide 2: Questões Stats
     <StatsSlide
       key="stats"
-      title="Seu esforço em números"
+      title="Suas questões em 2025"
       gradient="from-violet-900 via-purple-900 to-indigo-900"
       stats={[
-        {
-          label: 'Horas de Estudo',
-          value: Math.round(data.studyTime.totalHours),
-          icon: '⏱️',
-          description: `Média de ${data.studyTime.averageHoursPerDay.toFixed(1)}h por dia`,
-        },
         {
           label: 'Questões Resolvidas',
           value: data.questions.total,
           icon: '📝',
-          description: `${data.questions.correct.toLocaleString('pt-BR')} acertos`,
+          description: 'No ano inteiro',
+        },
+        {
+          label: 'Acertos',
+          value: data.questions.correct,
+          icon: '✅',
+          description: `${questionsWrong.toLocaleString('pt-BR')} erros`,
         },
         {
           label: 'Taxa de Acerto',
@@ -91,38 +94,38 @@ export default function Carousel({ data }: CarouselProps) {
       ]}
     />,
 
-    // Slide 3: Flashcards & Videos
+    // Slide 3: Mais métricas
     <StatsSlide
-      key="flashvideo"
-      title="Mais conquistas"
+      key="metrics"
+      title="Sua dedicação"
       gradient="from-blue-900 via-cyan-900 to-teal-900"
       stats={[
         {
-          label: 'Flashcards Revisados',
-          value: data.flashcards.total,
-          icon: '🃏',
-          description: `${data.flashcards.scoreDistribution.facil + data.flashcards.scoreDistribution.bom} marcados como "fácil" ou "bom"`,
+          label: 'Dias de Estudo',
+          value: data.daysStudied || 0,
+          icon: '📅',
+          description: 'Dias com questões resolvidas',
         },
         {
-          label: 'Aulas Assistidas',
-          value: data.videos.watched,
-          icon: '🎬',
-          description: `${data.videos.finished} finalizadas`,
+          label: 'Maior Sequência',
+          value: `${data.studyStreak} dias`,
+          icon: '🔥',
+          description: 'Consecutivos estudando',
         },
         {
-          label: 'Tempo em Vídeos',
-          value: `${Math.round(data.videos.totalHoursWatched)}h`,
-          icon: '📺',
-          description: 'De conhecimento puro',
+          label: 'Média Diária',
+          value: Math.round(data.questions.total / (data.daysStudied || 1)),
+          icon: '📊',
+          description: 'Questões por dia ativo',
         },
       ]}
     />,
 
-    // Slide 4: Top Specialties
+    // Slide 4: Top Especialidades
     <TopListSlide
       key="toplist"
       title="Top 5 Especialidades"
-      subtitle="Onde você mais focou este ano"
+      subtitle="Onde você mais praticou"
       items={data.topSpecialties.map((s) => ({
         rank: s.rank,
         title: s.title,
@@ -132,7 +135,7 @@ export default function Carousel({ data }: CarouselProps) {
       gradient="from-emerald-900 via-green-900 to-teal-900"
     />,
 
-    // Slide 5: Personality
+    // Slide 5: Personalidade
     <PersonalitySlide
       key="personality"
       personality={data.personality}
@@ -227,95 +230,98 @@ export default function Carousel({ data }: CarouselProps) {
   }, [data.year, isExporting, slides.length]);
 
   return (
-    <div className="w-full max-w-lg mx-auto">
+    <div className="w-full max-w-lg mx-auto px-2 sm:px-4">
       {/* Carousel container */}
       <div className="relative">
-        {/* Slides */}
-        <div className="relative overflow-hidden rounded-3xl shadow-2xl">
+        {/* Slides - responsive height */}
+        <div 
+          className="relative rounded-2xl sm:rounded-3xl shadow-2xl overflow-hidden"
+          style={{ height: 'min(75vh, 600px)', minHeight: '400px' }}
+        >
           <AnimatePresence mode="wait">
             <motion.div
               key={currentSlide}
-              initial={{ opacity: 0, x: 100 }}
+              initial={{ opacity: 0, x: 50 }}
               animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: -100 }}
-              transition={{ duration: 0.3, ease: 'easeInOut' }}
+              exit={{ opacity: 0, x: -50 }}
+              transition={{ duration: 0.2, ease: 'easeOut' }}
+              className="h-full"
             >
               <div
                 ref={(el) => {
                   slideRefs.current[currentSlide] = el;
                 }}
-                className="aspect-[9/16] w-full"
+                className="h-full w-full rounded-2xl sm:rounded-3xl overflow-hidden"
               >
                 {slides[currentSlide]}
               </div>
             </motion.div>
           </AnimatePresence>
 
-          {/* Navigation arrows */}
-          <button
-            onClick={prevSlide}
-            disabled={currentSlide === 0}
-            className={`absolute left-4 top-1/2 -translate-y-1/2 w-12 h-12 rounded-full bg-black/50 backdrop-blur-sm flex items-center justify-center transition-all ${
-              currentSlide === 0
-                ? 'opacity-30 cursor-not-allowed'
-                : 'opacity-70 hover:opacity-100 hover:scale-110'
-            }`}
-          >
-            <ChevronLeft className="w-6 h-6 text-white" />
-          </button>
-
-          <button
-            onClick={nextSlide}
-            disabled={currentSlide === slides.length - 1}
-            className={`absolute right-4 top-1/2 -translate-y-1/2 w-12 h-12 rounded-full bg-black/50 backdrop-blur-sm flex items-center justify-center transition-all ${
-              currentSlide === slides.length - 1
-                ? 'opacity-30 cursor-not-allowed'
-                : 'opacity-70 hover:opacity-100 hover:scale-110'
-            }`}
-          >
-            <ChevronRight className="w-6 h-6 text-white" />
-          </button>
-        </div>
-
-        {/* Dots indicator */}
-        <div className="flex justify-center gap-2 mt-4">
-          {slides.map((_, index) => (
+          {/* Instagram-style tap navigation zones */}
+          <div className="absolute inset-0 flex z-10">
+            {/* Left tap zone - go back */}
             <button
-              key={index}
-              onClick={() => goToSlide(index)}
-              className={`w-2 h-2 rounded-full transition-all ${
-                index === currentSlide
-                  ? 'bg-gradient-to-r from-cyan-400 to-purple-400 w-6'
-                  : 'bg-white/30 hover:bg-white/50'
-              }`}
+              onClick={prevSlide}
+              disabled={currentSlide === 0}
+              className="w-1/3 h-full cursor-pointer focus:outline-none active:bg-black/5 transition-colors"
+              aria-label="Slide anterior"
             />
-          ))}
+            {/* Center zone - no action */}
+            <div className="w-1/3 h-full" />
+            {/* Right tap zone - go forward */}
+            <button
+              onClick={nextSlide}
+              disabled={currentSlide === slides.length - 1}
+              className="w-1/3 h-full cursor-pointer focus:outline-none active:bg-black/5 transition-colors"
+              aria-label="Próximo slide"
+            />
+          </div>
+
+          {/* Progress bar at top (Instagram style) */}
+          <div className="absolute top-2 sm:top-3 left-2 sm:left-3 right-2 sm:right-3 flex gap-1 z-20">
+            {slides.map((_, index) => (
+              <div
+                key={index}
+                className="flex-1 h-0.5 sm:h-1 rounded-full bg-white/30 overflow-hidden"
+              >
+                <motion.div
+                  className="h-full bg-white"
+                  initial={false}
+                  animate={{
+                    width: index < currentSlide ? '100%' : index === currentSlide ? '100%' : '0%',
+                  }}
+                  transition={{ duration: index === currentSlide ? 0.3 : 0 }}
+                />
+              </div>
+            ))}
+          </div>
         </div>
       </div>
 
-      {/* Export buttons */}
-      <div className="flex gap-3 mt-6 justify-center">
+      {/* Export buttons - responsive */}
+      <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 mt-4 sm:mt-6 px-2">
         <button
           onClick={exportCurrentSlide}
           disabled={isExporting}
-          className="flex items-center gap-2 px-6 py-3 rounded-full bg-gradient-to-r from-cyan-500 to-purple-500 text-white font-medium transition-all hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed"
+          className="flex items-center justify-center gap-2 px-4 sm:px-6 py-3 rounded-full bg-gradient-to-r from-cyan-500 to-purple-500 text-white font-medium text-sm sm:text-base transition-all active:scale-95 sm:hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed flex-1 sm:flex-none"
         >
-          <Download className="w-5 h-5" />
+          <Download className="w-4 h-4 sm:w-5 sm:h-5" />
           {isExporting ? 'Exportando...' : 'Baixar Slide'}
         </button>
 
         <button
           onClick={exportAllSlides}
           disabled={isExporting}
-          className="flex items-center gap-2 px-6 py-3 rounded-full bg-white/10 border border-white/20 text-white font-medium transition-all hover:bg-white/20 hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed"
+          className="flex items-center justify-center gap-2 px-4 sm:px-6 py-3 rounded-full bg-white/10 border border-white/20 text-white font-medium text-sm sm:text-base transition-all active:scale-95 sm:hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed flex-1 sm:flex-none"
         >
-          <Share2 className="w-5 h-5" />
+          <Share2 className="w-4 h-4 sm:w-5 sm:h-5" />
           Baixar Tudo
         </button>
       </div>
 
-      <p className="text-center text-white/50 text-sm mt-4">
-        📱 Imagens otimizadas para Instagram Stories (1080x1920)
+      <p className="text-center text-white/40 text-xs sm:text-sm mt-3 sm:mt-4">
+        📱 Otimizado para Instagram Stories
       </p>
 
       {/* Hidden slides for export */}
@@ -336,4 +342,3 @@ export default function Carousel({ data }: CarouselProps) {
     </div>
   );
 }
-

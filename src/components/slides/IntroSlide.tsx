@@ -9,36 +9,36 @@ interface IntroSlideProps {
 
 export default function IntroSlide({ year, userName }: IntroSlideProps) {
   return (
-    <div className="slide-container bg-gradient-to-br from-[#0a0a0a] via-[#1a0a2e] to-[#0a0a0a] flex flex-col items-center justify-center text-center p-8">
+    <div className="slide-container bg-gradient-to-br from-[#0a0a0a] via-[#1a0a2e] to-[#0a0a0a] flex flex-col items-center justify-center text-center p-4 sm:p-8 pt-10 sm:pt-12">
       {/* Animated background elements */}
-      <div className="absolute inset-0 overflow-hidden">
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <motion.div
-          className="absolute w-96 h-96 rounded-full bg-gradient-to-r from-cyan-500/20 to-purple-500/20 blur-3xl"
+          className="absolute w-64 sm:w-96 h-64 sm:h-96 rounded-full bg-gradient-to-r from-cyan-500/20 to-purple-500/20 blur-3xl"
           animate={{
-            x: [0, 100, 0],
-            y: [0, -50, 0],
-            scale: [1, 1.2, 1],
+            x: [0, 50, 0],
+            y: [0, -30, 0],
+            scale: [1, 1.1, 1],
           }}
           transition={{
             duration: 8,
             repeat: Infinity,
             ease: 'easeInOut',
           }}
-          style={{ top: '10%', left: '10%' }}
+          style={{ top: '5%', left: '5%' }}
         />
         <motion.div
-          className="absolute w-80 h-80 rounded-full bg-gradient-to-r from-pink-500/20 to-orange-500/20 blur-3xl"
+          className="absolute w-48 sm:w-80 h-48 sm:h-80 rounded-full bg-gradient-to-r from-pink-500/20 to-orange-500/20 blur-3xl"
           animate={{
-            x: [0, -80, 0],
-            y: [0, 80, 0],
-            scale: [1, 1.3, 1],
+            x: [0, -40, 0],
+            y: [0, 40, 0],
+            scale: [1, 1.2, 1],
           }}
           transition={{
             duration: 10,
             repeat: Infinity,
             ease: 'easeInOut',
           }}
-          style={{ bottom: '10%', right: '10%' }}
+          style={{ bottom: '5%', right: '5%' }}
         />
       </div>
 
@@ -52,16 +52,16 @@ export default function IntroSlide({ year, userName }: IntroSlideProps) {
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.3, duration: 0.6 }}
-          className="mb-8"
+          className="mb-4 sm:mb-6"
         >
-          <span className="text-6xl">🎓</span>
+          <span className="text-4xl sm:text-6xl">🎓</span>
         </motion.div>
 
         <motion.h1
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.5, duration: 0.6 }}
-          className="text-5xl md:text-7xl font-black mb-4 bg-gradient-to-r from-cyan-400 via-purple-400 to-pink-400 bg-clip-text text-transparent"
+          className="text-4xl sm:text-5xl md:text-7xl font-black mb-2 sm:mb-4 bg-gradient-to-r from-cyan-400 via-purple-400 to-pink-400 bg-clip-text text-transparent"
           style={{ fontFamily: 'Clash Display, sans-serif' }}
         >
           SEU {year}
@@ -71,7 +71,7 @@ export default function IntroSlide({ year, userName }: IntroSlideProps) {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.7, duration: 0.6 }}
-          className="text-2xl md:text-3xl font-bold text-white/90 mb-6"
+          className="text-xl sm:text-2xl md:text-3xl font-bold text-white/90 mb-4 sm:mb-6"
         >
           em Medicina
         </motion.h2>
@@ -80,10 +80,10 @@ export default function IntroSlide({ year, userName }: IntroSlideProps) {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 1, duration: 0.8 }}
-          className="mt-8"
+          className="mt-4 sm:mt-8"
         >
-          <p className="text-white/60 text-lg mb-2">Preparado por</p>
-          <p className="text-2xl font-bold bg-gradient-to-r from-cyan-400 to-purple-400 bg-clip-text text-transparent">
+          <p className="text-white/60 text-sm sm:text-lg mb-1 sm:mb-2">Preparado por</p>
+          <p className="text-xl sm:text-2xl font-bold bg-gradient-to-r from-cyan-400 to-purple-400 bg-clip-text text-transparent">
             {userName || 'Você'}
           </p>
         </motion.div>
@@ -92,13 +92,13 @@ export default function IntroSlide({ year, userName }: IntroSlideProps) {
           initial={{ opacity: 0, scale: 0 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ delay: 1.2, duration: 0.5 }}
-          className="mt-12 flex justify-center gap-2"
+          className="mt-6 sm:mt-10 flex justify-center gap-2"
         >
           {[0, 1, 2].map((i) => (
             <motion.div
               key={i}
-              className="w-2 h-2 rounded-full bg-gradient-to-r from-cyan-400 to-purple-400"
-              animate={{ y: [0, -10, 0] }}
+              className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-gradient-to-r from-cyan-400 to-purple-400"
+              animate={{ y: [0, -8, 0] }}
               transition={{
                 duration: 0.6,
                 repeat: Infinity,
@@ -114,11 +114,10 @@ export default function IntroSlide({ year, userName }: IntroSlideProps) {
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ delay: 1.5, duration: 0.5 }}
-        className="absolute bottom-8 left-1/2 -translate-x-1/2"
+        className="absolute bottom-4 sm:bottom-8 left-1/2 -translate-x-1/2"
       >
-        <p className="text-white/40 text-sm font-medium tracking-wider">MEDCOF</p>
+        <p className="text-white/40 text-xs sm:text-sm font-medium tracking-wider">MEDCOF</p>
       </motion.div>
     </div>
   );
 }
-
