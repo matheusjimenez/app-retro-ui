@@ -1,6 +1,7 @@
 'use client';
 
 import { motion } from 'framer-motion';
+import Image from 'next/image';
 
 interface SummarySlideProps {
   year: number;
@@ -130,14 +131,23 @@ export default function SummarySlide({
         </motion.div>
       </motion.div>
 
-      {/* Medcof branding */}
+      {/* Medcof branding with logo and slogan */}
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ delay: 1.3, duration: 0.5 }}
-        className="absolute bottom-4 sm:bottom-8 left-1/2 -translate-x-1/2"
+        className="absolute bottom-4 sm:bottom-8 left-1/2 -translate-x-1/2 text-center"
       >
-        <p className="text-white/40 text-xs sm:text-sm font-medium tracking-wider">MEDCOF</p>
+        <Image
+          src="/logo-branco-medcof.png"
+          alt="Medcof"
+          width={120}
+          height={35}
+          className="w-20 sm:w-28 h-auto mx-auto mb-1"
+        />
+        <p className="text-white/40 text-[10px] sm:text-xs font-medium italic">
+          &quot;A medicina merece o melhor&quot;
+        </p>
       </motion.div>
     </div>
   );

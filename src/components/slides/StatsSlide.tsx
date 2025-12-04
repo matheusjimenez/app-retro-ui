@@ -1,6 +1,7 @@
 'use client';
 
 import { motion } from 'framer-motion';
+import Image from 'next/image';
 
 interface Stat {
   label: string;
@@ -83,14 +84,20 @@ export default function StatsSlide({
         </div>
 
         {/* Branding */}
-        <motion.p
+        <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.6 }}
-          className="text-white/40 text-xs sm:text-sm font-medium tracking-widest mt-auto pt-4 sm:pt-6"
+          className="mt-auto pt-4 sm:pt-6"
         >
-          MEDCOF
-        </motion.p>
+          <Image
+            src="/logo-branco-medcof.png"
+            alt="Medcof"
+            width={100}
+            height={28}
+            className="w-16 sm:w-20 h-auto mx-auto opacity-50"
+          />
+        </motion.div>
       </div>
     </div>
   );

@@ -67,7 +67,7 @@ Todas as requisições usam o período de **1 de janeiro a 31 de dezembro de 202
 
 | Slide | Descrição |
 |-------|-----------|
-| 1. Intro | Apresentação personalizada "SEU 2025 em Medicina" |
+| 1. Intro | Apresentação personalizada "SEU 2025 na MED" |
 | 2. Questões | Total resolvido, acertos, taxa de acerto |
 | 3. Dedicação | Dias de estudo, sequência, média diária |
 | 4. Top 5 | Especialidades mais praticadas |

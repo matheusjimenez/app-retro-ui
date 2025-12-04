@@ -1,6 +1,7 @@
 'use client';
 
 import { motion } from 'framer-motion';
+import Image from 'next/image';
 
 interface TopItem {
   rank: number;
@@ -141,7 +142,13 @@ export default function TopListSlide({
         transition={{ delay: 1, duration: 0.5 }}
         className="absolute bottom-4 sm:bottom-8 left-1/2 -translate-x-1/2"
       >
-        <p className="text-white/40 text-xs sm:text-sm font-medium tracking-wider">MEDCOF</p>
+        <Image
+          src="/logo-branco-medcof.png"
+          alt="Medcof"
+          width={100}
+          height={28}
+          className="w-16 sm:w-20 h-auto mx-auto opacity-50"
+        />
       </motion.div>
     </div>
   );

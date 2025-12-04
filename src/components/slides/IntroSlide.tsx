@@ -1,6 +1,7 @@
 'use client';
 
 import { motion } from 'framer-motion';
+import Image from 'next/image';
 
 interface IntroSlideProps {
   year: number;
@@ -48,13 +49,20 @@ export default function IntroSlide({ year, userName }: IntroSlideProps) {
         transition={{ duration: 0.8, ease: 'easeOut' }}
         className="relative z-10"
       >
+        {/* Logo Medcof */}
         <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.3, duration: 0.6 }}
           className="mb-4 sm:mb-6"
         >
-          <span className="text-4xl sm:text-6xl">🎓</span>
+          <Image
+            src="/logo-branco-medcof.png"
+            alt="Medcof"
+            width={180}
+            height={50}
+            className="w-32 sm:w-44 h-auto mx-auto"
+          />
         </motion.div>
 
         <motion.h1
@@ -109,14 +117,16 @@ export default function IntroSlide({ year, userName }: IntroSlideProps) {
         </motion.div>
       </motion.div>
 
-      {/* Medcof branding */}
+      {/* Slogan */}
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ delay: 1.5, duration: 0.5 }}
-        className="absolute bottom-4 sm:bottom-8 left-1/2 -translate-x-1/2"
+        className="absolute bottom-4 sm:bottom-8 left-1/2 -translate-x-1/2 text-center"
       >
-        <p className="text-white/40 text-xs sm:text-sm font-medium tracking-wider">MEDCOF</p>
+        <p className="text-white/50 text-xs sm:text-sm font-medium italic tracking-wide">
+          &quot;A medicina merece o melhor&quot;
+        </p>
       </motion.div>
     </div>
   );
