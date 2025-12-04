@@ -71,11 +71,17 @@ export async function fetchRightAnswersEvolution(token: string): Promise<RightAn
   return fetchWithAuth<RightAnswersEvolutionResponse>(url, token);
 }
 
-// Calcula a maior sequência de dias estudando
-function calculateStreak(dailyData: Array<{ date: string }>): number {
-  if (dailyData.length === 0) return 0;
+// Calcula a maior sequência de dias estudando consecutivos
+// Filtra apenas dias com count > 0 (dias que realmente estudou)
+function calculateStreak(dailyData: Array<{ date: string; count?: number; total?: number }>): number {
+  if (!dailyData || dailyData.length === 0) return 0;
 
-  const sortedDates = dailyData
+  // Filtra apenas dias com atividade (count > 0 ou total > 0)
+  const activeDays = dailyData.filter((d) => (d.count || 0) > 0 || (d.total || 0) > 0);
+  
+  if (activeDays.length === 0) return 0;
+
+  const sortedDates = activeDays
     .map((d) => d.date)
     .sort();
 
@@ -98,6 +104,14 @@ function calculateStreak(dailyData: Array<{ date: string }>): number {
   }
 
   return maxStreak;
+}
+
+// Conta total de dias com atividade
+function countStudyDays(dailyData: Array<{ date: string; count?: number; total?: number }>): number {
+  if (!dailyData || dailyData.length === 0) return 0;
+  
+  // Conta apenas dias com count > 0 ou total > 0
+  return dailyData.filter((d) => (d.count || 0) > 0 || (d.total || 0) > 0).length;
 }
 
 // Determina personalidade baseada nos hábitos de estudo
@@ -241,40 +255,147 @@ export async function fetchAllStats(token: string): Promise<RetrospectiveStats> 
     fetchRightAnswersEvolution(token),
   ]);
 
-  console.log('Daily response:', dailyResponse);
-  console.log('Answered response:', answeredResponse);
-  console.log('Wrong response:', wrongResponse);
-  console.log('Evolution response:', evolutionResponse);
+  console.log('Daily response:', JSON.stringify(dailyResponse, null, 2));
+  console.log('Answered response:', JSON.stringify(answeredResponse, null, 2));
+  console.log('Wrong response:', JSON.stringify(wrongResponse, null, 2));
+  console.log('Evolution response:', JSON.stringify(evolutionResponse, null, 2));
 
-  // Extrai os dados
-  const dailyQuestions = dailyResponse.data || [];
-  const answeredData = answeredResponse.data || { total: 0, correct: 0, wrong: 0, accuracy: 0 };
-  const wrongData = wrongResponse.data || { total: 0, questions: [] };
-  const evolutionData = evolutionResponse.data || [];
+  // Extrai os dados - a API pode retornar dentro de .data ou diretamente
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const dailyQuestions = (dailyResponse as any).data || (Array.isArray(dailyResponse) ? dailyResponse : []);
+  
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const rawAnswered = answeredResponse as any;
+  const answeredData = rawAnswered.data || rawAnswered || { total: 0, correct: 0, wrong: 0, accuracy: 0 };
+  
+  // Normaliza os campos (API pode usar nomes diferentes)
+  const normalizedAnswered = {
+    total: answeredData.totalQuestionsAnswered || answeredData.total || 0,
+    correct: answeredData.totalQuestionsAnsweredCount?.rightQuestionsCount || answeredData.correct || 0,
+    wrong: answeredData.totalQuestionsAnsweredCount?.wrongQuestionsCount || answeredData.wrong || 0,
+    accuracy: answeredData.totalQuestionsAnsweredCount?.rightQuestionsPercentage || answeredData.accuracy || 0,
+    byTag: answeredData.byTag || [],
+  };
+  
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const rawWrong = wrongResponse as any;
+  const wrongData = rawWrong.data || rawWrong || { count: 0, questions: [] };
+  const wrongCount = wrongData.count || wrongData.total || (wrongData.questions?.length) || 0;
+  
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const rawEvolution = evolutionResponse as any;
+  const evolutionData = rawEvolution.data || rawEvolution.datasets || rawEvolution || [];
 
-  // Calcula métricas
-  const totalDaysStudied = dailyQuestions.length;
+  console.log('Normalized answered:', normalizedAnswered);
+  console.log('Wrong count:', wrongCount);
+
+  // Calcula métricas - usa apenas dias com atividade (count > 0)
+  const totalDaysStudied = countStudyDays(dailyQuestions);
   const bestStreak = calculateStreak(dailyQuestions);
   const averageQuestionsPerDay = totalDaysStudied > 0 
-    ? Math.round(answeredData.total / totalDaysStudied) 
+    ? Math.round(normalizedAnswered.total / totalDaysStudied) 
     : 0;
+    
+  console.log('totalDaysStudied (with activity):', totalDaysStudied);
+  console.log('bestStreak:', bestStreak);
 
-  // Por especialidade (se disponível)
-  const bySpecialty = (answeredData.byTag || [])
-    .sort((a, b) => b.total - a.total)
-    .slice(0, 5)
-    .map((tag, index) => ({
-      rank: index + 1,
-      title: tag.tagName,
-      total: tag.total,
-      correct: tag.correct,
-      value: `${tag.total} questões`,
-    }));
+  // Por especialidade (se disponível no evolutionResponse - datasets por especialidade)
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  let bySpecialty: any[] = [];
+  
+  // Tenta extrair de byTag primeiro
+  if (normalizedAnswered.byTag && normalizedAnswered.byTag.length > 0) {
+    bySpecialty = normalizedAnswered.byTag
+      .sort((a: { total: number }, b: { total: number }) => b.total - a.total)
+      .slice(0, 5)
+      .map((tag: { tagName: string; total: number; correct: number }, index: number) => ({
+        rank: index + 1,
+        title: tag.tagName,
+        total: tag.total,
+        correct: tag.correct,
+        value: `${tag.total.toLocaleString('pt-BR')} questões`,
+      }));
+  }
+  
+  // Se não tiver byTag, tenta extrair dos datasets do evolution (especialidades)
+  // Os datasets contêm arrays de percentuais de acerto por mês
+  if (bySpecialty.length === 0 && rawEvolution.datasets) {
+    // Calcula total de questões para estimar distribuição
+    const totalQuestoes = normalizedAnswered.total || 0;
+    
+    // Processa todos os datasets para calcular proporção
+    const especialidadesProcessadas = rawEvolution.datasets
+      .filter((ds: { label: string }) => ds.label !== 'Todas as Especialidades')
+      .map((ds: { label: string; dataset: number[] }) => {
+        // dataset é array de percentuais (números) - um por mês
+        const percentuais = Array.isArray(ds.dataset) ? ds.dataset : [];
+        // Filtra meses com atividade (percentual > 0)
+        const mesesAtivos = percentuais.filter((p: number) => p > 0);
+        // Calcula média de acerto
+        const mediaAcerto = mesesAtivos.length > 0 
+          ? mesesAtivos.reduce((sum: number, p: number) => sum + p, 0) / mesesAtivos.length 
+          : 0;
+        // Conta meses com atividade como indicador de dedicação
+        const mesesEstudados = mesesAtivos.length;
+        // Soma dos percentuais como peso (indica intensidade de estudo)
+        const pesoTotal = percentuais.reduce((sum: number, p: number) => sum + p, 0);
+        
+        return {
+          label: ds.label,
+          mediaAcerto,
+          mesesEstudados,
+          pesoTotal,
+        };
+      });
+    
+    // Calcula peso total para distribuição proporcional
+    const pesoGeral = especialidadesProcessadas.reduce(
+      (sum: number, e: { pesoTotal: number }) => sum + e.pesoTotal, 0
+    );
+    
+    bySpecialty = especialidadesProcessadas
+      // Ordena por meses estudados (mais dedicação) depois por média de acerto
+      .sort((a: { mesesEstudados: number; mediaAcerto: number }, b: { mesesEstudados: number; mediaAcerto: number }) => {
+        if (b.mesesEstudados !== a.mesesEstudados) {
+          return b.mesesEstudados - a.mesesEstudados;
+        }
+        return b.mediaAcerto - a.mediaAcerto;
+      })
+      .slice(0, 5)
+      .map((item: { label: string; mediaAcerto: number; mesesEstudados: number; pesoTotal: number }, index: number) => {
+        // Estima questões proporcionalmente ao peso
+        const questoesEstimadas = pesoGeral > 0 
+          ? Math.round((item.pesoTotal / pesoGeral) * totalQuestoes)
+          : 0;
+        
+        return {
+          rank: index + 1,
+          title: item.label,
+          total: questoesEstimadas,
+          correct: Math.round(questoesEstimadas * (item.mediaAcerto / 100)),
+          value: `${questoesEstimadas.toLocaleString('pt-BR')} questões • ${item.mediaAcerto.toFixed(0)}% acerto`,
+        };
+      });
+  }
+  
+  console.log('bySpecialty:', bySpecialty);
+
+  // Calcula taxa de acerto
+  // A API pode retornar como decimal (0.27) ou percentual (27)
+  let calculatedAccuracy = normalizedAnswered.accuracy || 
+    (normalizedAnswered.total > 0 ? (normalizedAnswered.correct / normalizedAnswered.total) * 100 : 0);
+  
+  // Se o valor estiver entre 0 e 1, converte para percentual
+  if (calculatedAccuracy > 0 && calculatedAccuracy <= 1) {
+    calculatedAccuracy = calculatedAccuracy * 100;
+  }
+  
+  console.log('calculatedAccuracy:', calculatedAccuracy);
 
   // Determina personalidade
   const personality = determinePersonality({
-    questionsTotal: answeredData.total,
-    accuracyRate: answeredData.accuracy || (answeredData.total > 0 ? (answeredData.correct / answeredData.total) * 100 : 0),
+    questionsTotal: normalizedAnswered.total,
+    accuracyRate: calculatedAccuracy,
     streak: bestStreak,
     totalDays: totalDaysStudied,
     averagePerDay: averageQuestionsPerDay,
@@ -282,21 +403,21 @@ export async function fetchAllStats(token: string): Promise<RetrospectiveStats> 
 
   // Gera fun fact
   const funFact = generateFunFact({
-    questionsTotal: answeredData.total,
-    accuracyRate: answeredData.accuracy || (answeredData.total > 0 ? (answeredData.correct / answeredData.total) * 100 : 0),
+    questionsTotal: normalizedAnswered.total,
+    accuracyRate: calculatedAccuracy,
     streak: bestStreak,
     totalDays: totalDaysStudied,
-    hardestCount: wrongData.total || wrongData.questions?.length || 0,
+    hardestCount: wrongCount,
   });
 
-  return {
-    dailyQuestions,
-    questionsTotal: answeredData.total,
-    questionsCorrect: answeredData.correct,
-    questionsWrong: answeredData.wrong,
-    accuracyRate: answeredData.accuracy || (answeredData.total > 0 ? (answeredData.correct / answeredData.total) * 100 : 0),
-    hardestQuestionsCount: wrongData.total || wrongData.questions?.length || 0,
-    accuracyEvolution: evolutionData,
+  const result: RetrospectiveStats = {
+    dailyQuestions: Array.isArray(dailyQuestions) ? dailyQuestions : [],
+    questionsTotal: normalizedAnswered.total,
+    questionsCorrect: normalizedAnswered.correct,
+    questionsWrong: normalizedAnswered.wrong,
+    accuracyRate: calculatedAccuracy,
+    hardestQuestionsCount: wrongCount,
+    accuracyEvolution: Array.isArray(evolutionData) ? evolutionData : [],
     totalDaysStudied,
     bestStreak,
     peakStudyHour: 20, // Default, poderia ser calculado se tivéssemos dados de hora
@@ -304,10 +425,12 @@ export async function fetchAllStats(token: string): Promise<RetrospectiveStats> 
     personality,
     funFact,
     bySpecialty: bySpecialty.length > 0 ? bySpecialty : [
-      { rank: 1, title: 'Clínica Médica', total: 0, correct: 0, value: '0 questões' },
-      { rank: 2, title: 'Cirurgia', total: 0, correct: 0, value: '0 questões' },
-      { rank: 3, title: 'Pediatria', total: 0, correct: 0, value: '0 questões' },
+      { rank: 1, title: 'Sem dados', total: 0, correct: 0, value: '0 questões' },
     ],
   };
+
+  console.log('Final result:', JSON.stringify(result, null, 2));
+  
+  return result;
 }
 
