@@ -91,6 +91,10 @@ function getDemoStatistics() {
     bestStreak: 45,
     peakStudyHour: 23,
     averageQuestionsPerDay: 45,
+    dailyRecord: 156,
+    dailyRecordDate: '2025-08-15',
+    bestMonth: 'Agosto',
+    bestMonthCount: 2847,
     bySpecialty: [
       { rank: 1, title: 'Clínica Médica', total: 3200, correct: 2560, value: '3.200 questões' },
       { rank: 2, title: 'Cirurgia', total: 2800, correct: 2100, value: '2.800 questões' },

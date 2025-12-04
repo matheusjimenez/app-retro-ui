@@ -114,6 +114,56 @@ function countStudyDays(dailyData: Array<{ date: string; count?: number; total?:
   return dailyData.filter((d) => (d.count || 0) > 0 || (d.total || 0) > 0).length;
 }
 
+// Calcula o recorde diário (maior número de questões em um único dia)
+function calculateDailyRecord(dailyData: Array<{ date: string; count?: number; total?: number }>): { count: number; date: string } {
+  if (!dailyData || dailyData.length === 0) return { count: 0, date: '' };
+  
+  let maxCount = 0;
+  let maxDate = '';
+  
+  for (const day of dailyData) {
+    const count = day.count || day.total || 0;
+    if (count > maxCount) {
+      maxCount = count;
+      maxDate = day.date;
+    }
+  }
+  
+  return { count: maxCount, date: maxDate };
+}
+
+// Calcula o mês mais produtivo (maior soma de questões)
+function calculateBestMonth(dailyData: Array<{ date: string; count?: number; total?: number }>): { month: string; count: number } {
+  if (!dailyData || dailyData.length === 0) return { month: '', count: 0 };
+  
+  const monthNames = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 
+                      'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
+  
+  const monthTotals: Record<string, number> = {};
+  
+  for (const day of dailyData) {
+    const count = day.count || day.total || 0;
+    if (count > 0) {
+      const date = new Date(day.date);
+      const monthKey = `${date.getFullYear()}-${date.getMonth()}`;
+      monthTotals[monthKey] = (monthTotals[monthKey] || 0) + count;
+    }
+  }
+  
+  let bestMonth = '';
+  let bestCount = 0;
+  
+  for (const [key, total] of Object.entries(monthTotals)) {
+    if (total > bestCount) {
+      bestCount = total;
+      const [, monthIdx] = key.split('-');
+      bestMonth = monthNames[parseInt(monthIdx)];
+    }
+  }
+  
+  return { month: bestMonth, count: bestCount };
+}
+
 // Determina personalidade baseada nos hábitos de estudo
 function determinePersonality(stats: {
   questionsTotal: number;
@@ -295,9 +345,15 @@ export async function fetchAllStats(token: string): Promise<RetrospectiveStats> 
   const averageQuestionsPerDay = totalDaysStudied > 0 
     ? Math.round(normalizedAnswered.total / totalDaysStudied) 
     : 0;
+  
+  // Novas métricas
+  const dailyRecord = calculateDailyRecord(dailyQuestions);
+  const bestMonth = calculateBestMonth(dailyQuestions);
     
   console.log('totalDaysStudied (with activity):', totalDaysStudied);
   console.log('bestStreak:', bestStreak);
+  console.log('dailyRecord:', dailyRecord);
+  console.log('bestMonth:', bestMonth);
 
   // Por especialidade (se disponível no evolutionResponse - datasets por especialidade)
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -422,6 +478,10 @@ export async function fetchAllStats(token: string): Promise<RetrospectiveStats> 
     bestStreak,
     peakStudyHour: 20, // Default, poderia ser calculado se tivéssemos dados de hora
     averageQuestionsPerDay,
+    dailyRecord: dailyRecord.count,
+    dailyRecordDate: dailyRecord.date,
+    bestMonth: bestMonth.month,
+    bestMonthCount: bestMonth.count,
     personality,
     funFact,
     bySpecialty: bySpecialty.length > 0 ? bySpecialty : [

@@ -30,6 +30,10 @@ interface RetrospectiveData {
   bestStreak: number;
   peakStudyHour: number;
   averageQuestionsPerDay: number;
+  dailyRecord: number;
+  dailyRecordDate: string;
+  bestMonth: string;
+  bestMonthCount: number;
   bySpecialty: Array<{
     rank: number;
     title: string;
@@ -52,7 +56,14 @@ function transformDataForCarousel(data: RetrospectiveData) {
     questions: {
       total: data.questionsTotal,
       correct: data.questionsCorrect,
+      wrong: data.questionsWrong,
       accuracyRate: data.accuracyRate,
+      hardestCount: data.hardestQuestionsCount,
+      averagePerDay: data.averageQuestionsPerDay,
+      dailyRecord: data.dailyRecord,
+      dailyRecordDate: data.dailyRecordDate,
+      bestMonth: data.bestMonth,
+      bestMonthCount: data.bestMonthCount,
     },
     flashcards: {
       total: 0, // Não temos dados de flashcard nessa API
@@ -184,7 +195,7 @@ export default function HomePage() {
           >
             Retrospectiva 2025
           </h1>
-          <p className="text-white/60 text-sm sm:text-base">Sua jornada de estudos em medicina</p>
+          <p className="text-white/60 text-sm sm:text-base">Sua jornada de estudos na MED</p>
         </motion.header>
 
         {/* Form or Carousel */}

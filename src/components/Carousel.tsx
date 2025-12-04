@@ -18,7 +18,14 @@ interface CarouselProps {
     questions: {
       total: number;
       correct: number;
+      wrong: number;
       accuracyRate: number;
+      hardestCount: number;
+      averagePerDay: number;
+      dailyRecord: number;
+      dailyRecordDate: string;
+      bestMonth: string;
+      bestMonthCount: number;
     };
     flashcards: {
       total: number;
@@ -60,36 +67,51 @@ export default function Carousel({ data }: CarouselProps) {
   const [isExporting, setIsExporting] = useState(false);
   const slideRefs = useRef<(HTMLDivElement | null)[]>([]);
 
-  // Calcula questões erradas
-  const questionsWrong = data.questions.total - data.questions.correct;
-
   const slides = [
     // Slide 1: Intro
     <IntroSlide key="intro" year={data.year} userName={data.userName} />,
 
-    // Slide 2: Questões Stats
+    // Slide 2: Questões Stats - Visão geral com 6 insights
     <StatsSlide
       key="stats"
       title="Suas questões em 2025"
       gradient="from-violet-900 via-purple-900 to-indigo-900"
       stats={[
         {
-          label: 'Questões Resolvidas',
+          label: 'Total Resolvidas',
           value: data.questions.total,
           icon: '📝',
-          description: 'No ano inteiro',
-        },
-        {
-          label: 'Acertos',
-          value: data.questions.correct,
-          icon: '✅',
-          description: `${questionsWrong.toLocaleString('pt-BR')} erros`,
+          description: `${data.questions.averagePerDay} por dia em média`,
         },
         {
           label: 'Taxa de Acerto',
           value: `${data.questions.accuracyRate.toFixed(0)}%`,
           icon: '🎯',
-          description: data.questions.accuracyRate >= 70 ? 'Excelente!' : 'Continue praticando!',
+          description: data.questions.accuracyRate >= 70 ? 'Acima da média!' : 'Continue evoluindo!',
+        },
+        {
+          label: 'Acertos',
+          value: data.questions.correct.toLocaleString('pt-BR'),
+          icon: '✅',
+          description: `${data.questions.wrong.toLocaleString('pt-BR')} erros`,
+        },
+        {
+          label: 'Desafiadoras',
+          value: data.questions.hardestCount,
+          icon: '💪',
+          description: 'Questões difíceis',
+        },
+        {
+          label: 'Recorde Diário',
+          value: data.questions.dailyRecord,
+          icon: '🏆',
+          description: 'Seu melhor dia!',
+        },
+        {
+          label: 'Melhor Mês',
+          value: data.questions.bestMonth || '-',
+          icon: '📆',
+          description: `${data.questions.bestMonthCount.toLocaleString('pt-BR')} questões`,
         },
       ]}
     />,

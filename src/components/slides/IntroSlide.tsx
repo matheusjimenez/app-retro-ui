@@ -81,7 +81,7 @@ export default function IntroSlide({ year, userName }: IntroSlideProps) {
           transition={{ delay: 0.7, duration: 0.6 }}
           className="text-xl sm:text-2xl md:text-3xl font-bold text-white/90 mb-4 sm:mb-6"
         >
-          em Medicina
+          na MED
         </motion.h2>
 
         <motion.div
@@ -90,7 +90,7 @@ export default function IntroSlide({ year, userName }: IntroSlideProps) {
           transition={{ delay: 1, duration: 0.8 }}
           className="mt-4 sm:mt-8"
         >
-          <p className="text-white/60 text-sm sm:text-lg mb-1 sm:mb-2">Preparado por</p>
+          <p className="text-white/60 text-sm sm:text-lg mb-1 sm:mb-2">Preparado para</p>
           <p className="text-xl sm:text-2xl font-bold bg-gradient-to-r from-cyan-400 to-purple-400 bg-clip-text text-transparent">
             {userName || 'Você'}
           </p>

@@ -78,6 +78,10 @@ export interface RetrospectiveStats {
   bestStreak: number;
   peakStudyHour: number;
   averageQuestionsPerDay: number;
+  dailyRecord: number;
+  dailyRecordDate: string;
+  bestMonth: string;
+  bestMonthCount: number;
   
   // Personalidade
   personality: {

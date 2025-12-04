@@ -21,6 +21,9 @@ export default function StatsSlide({
   stats,
   gradient = 'from-purple-900 via-violet-900 to-indigo-900',
 }: StatsSlideProps) {
+  // Use grid layout for 4+ stats, list for 3 or less
+  const useGrid = stats.length >= 4;
+
   return (
     <div className={`w-full h-full bg-gradient-to-br ${gradient} relative`}>
       {/* Background effects */}
@@ -42,60 +45,94 @@ export default function StatsSlide({
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
-          className="text-2xl sm:text-3xl font-black text-white text-center mb-4 sm:mb-6"
+          className="text-xl sm:text-2xl font-black text-white text-center mb-3 sm:mb-4"
           style={{ fontFamily: 'Clash Display, sans-serif' }}
         >
           {title}
         </motion.h2>
 
-        {/* Stats */}
-        <div className="w-full max-w-xs space-y-2.5 sm:space-y-3">
-          {stats.map((stat, index) => (
-            <motion.div
-              key={stat.label}
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 0.1 * index, duration: 0.3 }}
-              className="bg-white/10 backdrop-blur-sm rounded-xl sm:rounded-2xl p-3 sm:p-4 border border-white/20"
-            >
-              <div className="flex items-center gap-3 sm:gap-4">
-                <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-lg sm:rounded-xl bg-white/10 flex items-center justify-center text-xl sm:text-2xl flex-shrink-0">
-                  {stat.icon}
-                </div>
-                <div className="flex-1 min-w-0">
-                  <p className="text-white/60 text-[10px] sm:text-xs font-semibold uppercase tracking-wider">
-                    {stat.label}
-                  </p>
+        {/* Stats - Grid or List layout */}
+        {useGrid ? (
+          <div className="w-full max-w-sm grid grid-cols-2 gap-1.5 sm:gap-2">
+            {stats.map((stat, index) => (
+              <motion.div
+                key={stat.label}
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ delay: 0.05 * index, duration: 0.25 }}
+                className="bg-white/10 backdrop-blur-sm rounded-lg sm:rounded-xl p-2 sm:p-3 border border-white/20"
+              >
+                <div className="text-center">
+                  <div className="text-xl sm:text-2xl mb-0.5">{stat.icon}</div>
                   <p
-                    className="text-xl sm:text-2xl font-black text-white truncate"
+                    className="text-base sm:text-lg font-black text-white leading-tight"
                     style={{ fontFamily: 'Clash Display, sans-serif' }}
                   >
                     {typeof stat.value === 'number'
                       ? stat.value.toLocaleString('pt-BR')
                       : stat.value}
                   </p>
+                  <p className="text-white/60 text-[8px] sm:text-[9px] font-semibold uppercase tracking-wider mt-0.5 leading-tight">
+                    {stat.label}
+                  </p>
                   {stat.description && (
-                    <p className="text-white/50 text-[10px] sm:text-xs truncate">{stat.description}</p>
+                    <p className="text-white/40 text-[7px] sm:text-[8px] mt-0.5 line-clamp-1">
+                      {stat.description}
+                    </p>
                   )}
                 </div>
-              </div>
-            </motion.div>
-          ))}
-        </div>
+              </motion.div>
+            ))}
+          </div>
+        ) : (
+          <div className="w-full max-w-xs space-y-2 sm:space-y-2.5">
+            {stats.map((stat, index) => (
+              <motion.div
+                key={stat.label}
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: 0.1 * index, duration: 0.3 }}
+                className="bg-white/10 backdrop-blur-sm rounded-xl sm:rounded-2xl p-3 sm:p-4 border border-white/20"
+              >
+                <div className="flex items-center gap-3 sm:gap-4">
+                  <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-lg sm:rounded-xl bg-white/10 flex items-center justify-center text-xl sm:text-2xl flex-shrink-0">
+                    {stat.icon}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-white/60 text-[10px] sm:text-xs font-semibold uppercase tracking-wider">
+                      {stat.label}
+                    </p>
+                    <p
+                      className="text-xl sm:text-2xl font-black text-white truncate"
+                      style={{ fontFamily: 'Clash Display, sans-serif' }}
+                    >
+                      {typeof stat.value === 'number'
+                        ? stat.value.toLocaleString('pt-BR')
+                        : stat.value}
+                    </p>
+                    {stat.description && (
+                      <p className="text-white/50 text-[10px] sm:text-xs truncate">{stat.description}</p>
+                    )}
+                  </div>
+                </div>
+              </motion.div>
+            ))}
+          </div>
+        )}
 
         {/* Branding */}
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.6 }}
-          className="mt-auto pt-4 sm:pt-6"
+          className="mt-auto pt-3 sm:pt-4"
         >
           <Image
             src="/logo-branco-medcof.png"
             alt="Medcof"
             width={100}
             height={28}
-            className="w-16 sm:w-20 h-auto mx-auto opacity-50"
+            className="w-14 sm:w-18 h-auto mx-auto opacity-50"
           />
         </motion.div>
       </div>
