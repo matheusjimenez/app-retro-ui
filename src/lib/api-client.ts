@@ -487,6 +487,19 @@ export async function fetchAllStats(token: string): Promise<RetrospectiveStats> 
     bySpecialty: bySpecialty.length > 0 ? bySpecialty : [
       { rank: 1, title: 'Sem dados', total: 0, correct: 0, value: '0 questões' },
     ],
+    // Valores padrão para campos MongoDB (serão sobrescritos pela API route)
+    flashcardsTotal: 0,
+    flashcardsScoreDistribution: {
+      naoLembrei: 0,
+      dificil: 0,
+      bom: 0,
+      facil: 0,
+    },
+    videosWatched: 0,
+    videosFinished: 0,
+    videosTotalHoursWatched: 0,
+    videosPeakDay: undefined,
+    totalStudyHours: Math.round((normalizedAnswered.total * 2) / 60), // Estimativa: 2 min por questão
   };
 
   console.log('Final result:', JSON.stringify(result, null, 2));

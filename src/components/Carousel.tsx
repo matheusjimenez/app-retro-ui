@@ -10,6 +10,7 @@ import StatsSlide from './slides/StatsSlide';
 import TopListSlide from './slides/TopListSlide';
 import PersonalitySlide from './slides/PersonalitySlide';
 import SummarySlide from './slides/SummarySlide';
+import VideoFlashcardSlide from './slides/VideoFlashcardSlide';
 
 interface CarouselProps {
   data: {
@@ -40,6 +41,10 @@ interface CarouselProps {
       watched: number;
       finished: number;
       totalHoursWatched: number;
+      peakDay?: {
+        date: string;
+        hours: number;
+      };
     };
     studyTime: {
       totalHours: number;
@@ -143,7 +148,15 @@ export default function Carousel({ data }: CarouselProps) {
       ]}
     />,
 
-    // Slide 4: Top Especialidades
+    // Slide 4: Flashcards e Vídeos
+    <VideoFlashcardSlide
+      key="video-flashcard"
+      flashcards={data.flashcards}
+      videos={data.videos}
+      totalStudyHours={data.studyTime.totalHours}
+    />,
+
+    // Slide 5: Top Especialidades
     <TopListSlide
       key="toplist"
       title="Top 5 Especialidades"
@@ -157,14 +170,14 @@ export default function Carousel({ data }: CarouselProps) {
       gradient="from-emerald-900 via-green-900 to-teal-900"
     />,
 
-    // Slide 5: Personalidade
+    // Slide 6: Personalidade
     <PersonalitySlide
       key="personality"
       personality={data.personality}
       funFact={data.funFact}
     />,
 
-    // Slide 6: Summary
+    // Slide 7: Summary
     <SummarySlide
       key="summary"
       year={data.year}

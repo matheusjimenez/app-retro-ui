@@ -100,6 +100,27 @@ export interface RetrospectiveStats {
     correct: number;
     value: string;
   }>;
+  
+  // Flashcards stats (MongoDB)
+  flashcardsTotal: number;
+  flashcardsScoreDistribution: {
+    naoLembrei: number;
+    dificil: number;
+    bom: number;
+    facil: number;
+  };
+  
+  // Videos stats (MongoDB)
+  videosWatched: number;
+  videosFinished: number;
+  videosTotalHoursWatched: number;
+  videosPeakDay?: {
+    date: string;
+    hours: number;
+  };
+  
+  // Total study time (questions + flashcards + videos)
+  totalStudyHours: number;
 }
 
 // Dados do usuário do JWT decodificado

@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { fetchAllStats, decodeJWT } from '@/lib/api-client';
+import { getAllStudyStats } from '@/lib/mongodb-queries';
 
 // GET - Fetch retrospective stats usando o JWT
 export async function GET(request: NextRequest) {
@@ -35,8 +36,36 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    // Busca todas as estatísticas
+    // Busca estatísticas de questões da API externa
     const stats = await fetchAllStats(token);
+
+    // Estima tempo de questões (2 min por questão em média)
+    const estimatedQuestionTimeSeconds = stats.questionsTotal * 120;
+
+    // Busca estatísticas de flashcards e vídeos do MongoDB
+    let mongoStats: {
+      flashcards: { total: number; scoreDistribution: { naoLembrei: number; dificil: number; bom: number; facil: number } };
+      videos: { watched: number; finished: number; totalSecondsWatched: number; totalHoursWatched: number; peakDay?: { date: string; hours: number } };
+      totalStudyHours: number;
+    } = {
+      flashcards: {
+        total: 0,
+        scoreDistribution: { naoLembrei: 0, dificil: 0, bom: 0, facil: 0 },
+      },
+      videos: {
+        watched: 0,
+        finished: 0,
+        totalSecondsWatched: 0,
+        totalHoursWatched: 0,
+      },
+      totalStudyHours: Math.round(estimatedQuestionTimeSeconds / 3600),
+    };
+
+    try {
+      mongoStats = await getAllStudyStats(userData.id, estimatedQuestionTimeSeconds);
+    } catch (mongoError) {
+      console.warn('Erro ao buscar dados do MongoDB, usando valores padrão:', mongoError);
+    }
 
     return NextResponse.json({
       success: true,
@@ -46,6 +75,14 @@ export async function GET(request: NextRequest) {
         userName: userData.name || userData.anonName || 'Estudante',
         userPhoto: userData.photo,
         userEmail: userData.email,
+        // Dados do MongoDB
+        flashcardsTotal: mongoStats.flashcards.total,
+        flashcardsScoreDistribution: mongoStats.flashcards.scoreDistribution,
+        videosWatched: mongoStats.videos.watched,
+        videosFinished: mongoStats.videos.finished,
+        videosTotalHoursWatched: mongoStats.videos.totalHoursWatched,
+        videosPeakDay: mongoStats.videos.peakDay,
+        totalStudyHours: mongoStats.totalStudyHours,
       },
     });
   } catch (error) {
@@ -109,5 +146,24 @@ function getDemoStatistics() {
     },
     funFact:
       'Você resolveu 12.847 questões! Isso daria um livro de 1.285 páginas! 📚',
+    // Flashcards stats (baseado no MongoDB guide)
+    flashcardsTotal: 4532,
+    flashcardsScoreDistribution: {
+      naoLembrei: 453,   // ~10% - Score 0
+      dificil: 906,      // ~20% - Score 1
+      bom: 1813,         // ~40% - Score 2
+      facil: 1360,       // ~30% - Score 3
+    },
+    // Videos stats (baseado no MongoDB guide - video_daily_tracker)
+    videosWatched: 347,
+    videosFinished: 298,
+    videosTotalHoursWatched: 186,
+    videosPeakDay: {
+      date: '2025-09-22',
+      hours: 8.5,
+    },
+    // Total study time (questions ~2min each + flashcards ~30s each + videos)
+    // Questões: 12847 * 2min = 428h, Flashcards: 4532 * 0.5min = 38h, Vídeos: 186h
+    totalStudyHours: 652,
   };
 }

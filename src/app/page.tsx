@@ -46,10 +46,29 @@ interface RetrospectiveData {
     description: string;
   };
   funFact: string;
+  // Novos campos do MongoDB
+  flashcardsTotal?: number;
+  flashcardsScoreDistribution?: {
+    naoLembrei: number;
+    dificil: number;
+    bom: number;
+    facil: number;
+  };
+  videosWatched?: number;
+  videosFinished?: number;
+  videosTotalHoursWatched?: number;
+  videosPeakDay?: {
+    date: string;
+    hours: number;
+  };
+  totalStudyHours?: number;
 }
 
 // Transforma dados da API para o formato do Carousel
 function transformDataForCarousel(data: RetrospectiveData) {
+  // Calcula horas de estudo (usa o valor do MongoDB se disponível, senão estima)
+  const totalStudyHours = data.totalStudyHours ?? Math.round(data.questionsTotal * 2 / 60);
+  
   return {
     year: data.year,
     userName: data.userName,
@@ -66,8 +85,8 @@ function transformDataForCarousel(data: RetrospectiveData) {
       bestMonthCount: data.bestMonthCount,
     },
     flashcards: {
-      total: 0, // Não temos dados de flashcard nessa API
-      scoreDistribution: {
+      total: data.flashcardsTotal ?? 0,
+      scoreDistribution: data.flashcardsScoreDistribution ?? {
         naoLembrei: 0,
         dificil: 0,
         bom: 0,
@@ -75,13 +94,16 @@ function transformDataForCarousel(data: RetrospectiveData) {
       },
     },
     videos: {
-      watched: 0, // Não temos dados de vídeo nessa API
-      finished: 0,
-      totalHoursWatched: 0,
+      watched: data.videosWatched ?? 0,
+      finished: data.videosFinished ?? 0,
+      totalHoursWatched: data.videosTotalHoursWatched ?? 0,
+      peakDay: data.videosPeakDay,
     },
     studyTime: {
-      totalHours: Math.round(data.questionsTotal * 2 / 60), // Estimativa: 2 min por questão
-      averageHoursPerDay: data.averageQuestionsPerDay * 2 / 60,
+      totalHours: totalStudyHours,
+      averageHoursPerDay: data.totalDaysStudied > 0 
+        ? Number((totalStudyHours / data.totalDaysStudied).toFixed(1))
+        : data.averageQuestionsPerDay * 2 / 60,
     },
     topSpecialties: data.bySpecialty.map((s) => ({
       rank: s.rank,
